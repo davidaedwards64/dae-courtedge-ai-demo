@@ -125,6 +125,11 @@ class MultiAgentTokenExchange:
             scope_string = " ".join(scopes)
 
             logger.info(f"[{agent_type}] Step 1: ID token -> ID-JAG, audience={target_audience}")
+            logger.info(
+                f"[{agent_type}] subject_token preview: "
+                f"{'None' if not user_id_token else user_id_token[:40] + '...'} "
+                f"(length={len(user_id_token) if user_id_token else 0})"
+            )
 
             # First, we need the main auth server SDK for ID-JAG exchange
             main_sdk = self._get_main_sdk(config)
