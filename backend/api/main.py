@@ -40,6 +40,14 @@ app = FastAPI(
 
 # CORS configuration
 cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+logger.info("CORS allowed origins: %s", cors_origins)
+
+# Anthropic API key check
+_anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
+if _anthropic_key:
+    logger.info("ANTHROPIC_API_KEY is set (starts with: %s...)", _anthropic_key[:12])
+else:
+    logger.warning("ANTHROPIC_API_KEY is NOT set")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
