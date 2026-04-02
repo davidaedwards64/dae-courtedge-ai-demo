@@ -542,7 +542,7 @@ Return ONLY the JSON object, no other text."""
 
         # Check for write operations (increase, decrease, update, add)
         write_keywords = ["increase", "decrease", "update", "add", "set", "adjust", "reduce", "remove"]
-        is_write_operation = any(kw in context for kw in write_keywords)
+        is_write_operation = any(kw in message for kw in write_keywords)
 
         if is_write_operation:
             if "inventory:write" in scopes:
