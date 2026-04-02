@@ -162,6 +162,10 @@ export default function Home() {
         }),
       });
 
+      if (!response.ok) {
+        const rawText = await response.clone().text();
+        console.error('API error response:', response.status, response.statusText, rawText);
+      }
       const data = await response.json();
 
       // Store session ID for future requests (enables conversation memory)

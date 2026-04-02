@@ -183,17 +183,18 @@ async def chat(
     else:
         user_info = {"email": "anonymous", "groups": []}
 
-    # Get or create conversation session
-    session_id = conversation_store.get_or_create_session(request.session_id)
-
-    # Get conversation context for routing
-    conversation_context = conversation_store.get_context_summary(session_id, max_messages=6)
-
-    # Store the user's message
-    conversation_store.add_message(session_id, "user", request.message)
-
     # Create orchestrator and process request with conversation context
     try:
+        # Get or create conversation session
+        session_id = conversation_store.get_or_create_session(request.session_id)
+
+        # Get conversation context for routing
+        conversation_context = conversation_store.get_context_summary(session_id, max_messages=6)
+
+        # Store the user's message
+        conversation_store.add_message(session_id, "user", request.message)
+
+        logger.info("Starting orchestrator for user: %s", user_info.get("email"))
         orchestrator = Orchestrator(
             user_token=user_token or "",
             user_info=user_info
