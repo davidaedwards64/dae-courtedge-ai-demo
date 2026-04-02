@@ -827,20 +827,31 @@ Return ONLY the JSON object, no other text."""
     def _handle_customer_action(self, message: str, scopes: List[str], context: str) -> str:
         """Handle customer-related actions with real data."""
 
-        # Check for specific customer lookup
+        # Check for specific customer lookup using word-level matching.
+        # The original check tested if the full customer name was a substring of the
+        # query (e.g. "state university athletics" in "tell me about state university"),
+        # which always failed for partial queries. Instead, count how many significant
+        # words from each customer name appear in the context and take the best match.
         customers = demo_store.get_all_customers()
+        matched_customer = None
+        best_match_count = 0
         for customer in customers.values():
-            if customer['name'].lower() in context or customer['contact'].lower() in context:
-                tier_emoji = {"Platinum": "💎", "Gold": "🥇", "Silver": "🥈", "Bronze": "🥉"}.get(customer['tier'], "")
-                return (
-                    f"**{customer['name']}** {tier_emoji}\n"
-                    f"- Customer ID: {customer['id']}\n"
-                    f"- Tier: {customer['tier']}\n"
-                    f"- Contact: {customer['contact']}\n"
-                    f"- Email: {customer['email']}\n"
-                    f"- Location: {customer['location']}\n"
-                    f"- Total Spent: ${customer['total_spent']:,}"
-                )
+            name_words = customer['name'].lower().split()
+            match_count = sum(1 for word in name_words if len(word) > 3 and word in context)
+            if match_count > best_match_count:
+                best_match_count = match_count
+                matched_customer = customer
+        if matched_customer and best_match_count > 0:
+            tier_emoji = {"Platinum": "💎", "Gold": "🥇", "Silver": "🥈", "Bronze": "🥉"}.get(matched_customer['tier'], "")
+            return (
+                f"**{matched_customer['name']}** {tier_emoji}\n"
+                f"- Customer ID: {matched_customer['id']}\n"
+                f"- Tier: {matched_customer['tier']}\n"
+                f"- Contact: {matched_customer['contact']}\n"
+                f"- Email: {matched_customer['email']}\n"
+                f"- Location: {matched_customer['location']}\n"
+                f"- Total Spent: ${matched_customer['total_spent']:,}"
+            )
 
         # Check for tier-based query
         for tier in ["platinum", "gold", "silver", "bronze"]:
